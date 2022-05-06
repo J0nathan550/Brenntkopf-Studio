@@ -20,7 +20,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void Start() {
         Cursor.lockState = CursorLockMode.Locked;
-        Application.targetFrameRate = 75;
     }
     private void Update() {
         playerMovement = new Vector3(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical"));
@@ -42,6 +41,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void PlayerCameraMove() { 
         xRotation -= cameraPlayerMovement.y * playerSensitivety;
+        xRotation = Mathf.Clamp(xRotation, -60f, 60f);
 
         transform.Rotate(0f, cameraPlayerMovement.x * playerSensitivety, 0f);
         playerCameraObject.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
