@@ -90,16 +90,16 @@ public class PlayerShooting : MonoBehaviour
         currentBulletAmount--;
         bulletsCounterText.text = $"{currentBulletAmount}/{totalBulletAmount}";
         RaycastHit hit;
-        //if (!gunSoundPoint.isPlaying)
-        //{
-        //    gunSoundPoint.clip = gunSounds[0];
-        //    gunSoundPoint.Play();
-        //}
         gunMuzzleFlash.Play();
         if (Physics.Raycast(cam.transform.position, cam.transform.forward, out hit, gunDistance))
         {
             Dummy dummy = hit.transform.GetComponent<Dummy>();
             if (dummy != null) dummy.TakeDamage(bullet_Damage);
+
+            if (hit.rigidbody != null)
+            {
+                hit.rigidbody.AddForce(-hit.normal * 1200f);
+            }
 
             Instantiate(impactModel, hit.point, Quaternion.LookRotation(hit.normal));
         }

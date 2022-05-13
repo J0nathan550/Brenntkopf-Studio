@@ -71,6 +71,9 @@
     <Compile Include="Assets\Materials\JMO Assets\WarFX\Scripts\WFX_LightFlicker.cs" />
     <Compile Include="Assets\Materials\JMO Assets\WarFX\Spawn System\CFX_SpawnSystem.cs" />
     <Compile Include="Assets\Scripts\Dummy.cs" />
+    <Compile Include="Assets\Scripts\LiftScript.cs" />
+    <Compile Include="Assets\Scripts\ObjectForce.cs" />
+    <Compile Include="Assets\Scripts\ObjectInstantiater.cs" />
     <Compile Include="Assets\Scripts\PlayerMovement.cs" />
     <Compile Include="Assets\Scripts\PlayerShooting.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01.cs" />
