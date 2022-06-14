@@ -1,44 +1,46 @@
-﻿using System.Collections;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 
 public class PlayerShooting : MonoBehaviour
 {
     [Header("Gun Variables")]
-    public int currentBulletAmount = 30;
+    public int currentBulletAmount = 30; 
     public int totalBulletAmount = 300;
     public int bullet_Damage = 10;
 
-    [SerializeField] private float fireRate = 12f;
-    [SerializeField] private float shootingDelay = 0f;
-    [SerializeField] private float gunDistance = 200f;
-
+    [SerializeField] private float fireRate = 12f; //кд оружия
+    [SerializeField] private float shootingDelay = 0f; //не трогать!
+    [SerializeField] private float gunDistance = 200f; //Дальность
+	[SerializeField] private float damageRecoil = 50f; // Отдача по обьекту (попал обьект сдвинуло)
+		
     [Header("Gun Attachments")]
-    [SerializeField] private Camera cam;
-    [SerializeField] private Transform gunCamera;
+    
+	[SerializeField] private Camera cam; //камера игрока
+    [SerializeField] private Transform gunCamera; //вторая камера для оружия (чтобы небыло бага того что оружие проходит сквозь текстурки).
 
-    [SerializeField] private GameObject impactModel;
-    [SerializeField] private ParticleSystem gunMuzzleFlash;
+    [SerializeField] private GameObject impactModel; // Эффект отверстия, когда стреляешь эффект попадания.
+    [SerializeField] private ParticleSystem gunMuzzleFlash; //партикл выстрела из дула
 
-    [SerializeField] private GameObject flashLightMod;
-    [SerializeField] private bool isHaveFlashLight;
+    [SerializeField] private GameObject flashLightMod; // опционально если фонарик пригодиться. Можешь за комментить и вырезать если не нужно.
+    [SerializeField] private bool isHaveFlashLight; //задаёшь параметр есть у тебя фонарик или нет. В любом случае можешь просто закоментить.
 
-    [SerializeField] private Animator gunAnimations;
-    [SerializeField] private AudioSource gunSoundPoint;
-    [SerializeField] private AudioClip[] gunSounds;
-    [Header("UI elements")]
-    [SerializeField]private TextMeshProUGUI bulletsCounterText;
+    [SerializeField] private Animator gunAnimations; //аниматор оружия нужны анимки: idleanim, shoot, aimshoot, goaiming (прицеливаешься), backaiming(перестал прицеливаться), lookatgun - не обязательно (смотреть на оружие "Помешан на таркове..."), flashlightonoff - включение выключение фонарика (ОДНОЙ АНИМКОЙ!), reloadgun - перезарядка. ФОТО АНИМАТОРА: https://imgur.com/gallery/cmTgjjx
+    [SerializeField] private AudioSource gunSoundPoint; //Аудиосурс один! 
+    [SerializeField] private AudioClip[] gunSounds; //закидываешь все звуки в массив аудиосурс проиграет их. Индексы: 0 - Выстрел, 1 - Перезарядка. Дальше по вкусу. 
+    
+	[Header("UI elements")]
+	
+    [SerializeField]private TextMeshProUGUI bulletsCounterText; // Отображение количества патронов.
 
     private bool isReloading = false;
-
     private Vector3 pos;
-
     private bool aiming;
+	
     private void Start()
     {
         pos = gunCamera.localPosition;    
     }
-
 
     private void Update()
     {
@@ -73,7 +75,7 @@ public class PlayerShooting : MonoBehaviour
             StartCoroutine(Reloading());
         }
 
-        if (Input.GetKeyDown(KeyCode.L))
+        if (Input.GetKeyDown(KeyCode.L)) // Можно закоментировать если не будем смотреть на оружие!
         {
             gunAnimations.Play("lookatgun");
         }
@@ -88,17 +90,22 @@ public class PlayerShooting : MonoBehaviour
     }
     private void Shoot() {
         currentBulletAmount--;
-        bulletsCounterText.text = $"{currentBulletAmount}/{totalBulletAmount}";
+       
+		bulletsCounterText.text = $"{currentBulletAmount}/{totalBulletAmount}";
         RaycastHit hit;
+		
+		gunSoundPoint.clip = gunSounds[0];
+        gunSoundPoint.Play();
+		
         gunMuzzleFlash.Play();
         if (Physics.Raycast(cam.transform.position, cam.transform.forward, out hit, gunDistance))
         {
-            Dummy dummy = hit.transform.GetComponent<Dummy>();
+            Dummy dummy = hit.transform.GetComponent<Dummy>();  //Хит по противнику 
             if (dummy != null) dummy.TakeDamage(bullet_Damage);
 
-            if (hit.rigidbody != null)
+            if (hit.rigidbody != null) 
             {
-                hit.rigidbody.AddForce(-hit.normal * 1200f);
+                hit.rigidbody.AddForce(-hit.normal * damageRecoil); //Отталкиваем его по приколу.
             }
 
             Instantiate(impactModel, hit.point, Quaternion.LookRotation(hit.normal));
@@ -109,10 +116,13 @@ public class PlayerShooting : MonoBehaviour
     {
         int maxCurrentBulletAmount = 30;
         isReloading = true;
-        gunSoundPoint.clip = gunSounds[1];
+        
+		gunSoundPoint.clip = gunSounds[1];
+		
         gunSoundPoint.Play();
         gunAnimations.Play("reloadgun");
-        yield return new WaitForSeconds(2);
+        
+		yield return new WaitForSeconds(2);
         for (int i = 0; i < maxCurrentBulletAmount; i++)
         {
             bool isEnough = false;
